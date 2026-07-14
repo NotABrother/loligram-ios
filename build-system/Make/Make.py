@@ -287,6 +287,11 @@ class BazelCommandLine:
         if self.disable_provisioning_profiles:
             combined_arguments += ['--//Telegram:disableProvisioningProfiles']
 
+        # Loligram's AltStore build deliberately omits app extensions. Besides
+        # avoiding unavailable distribution profiles, this keeps the build
+        # within the free Apple account's App ID limit.
+        combined_arguments += ['--//Telegram:disableExtensions']
+
         if self.configuration_path is None:
             raise Exception('configuration_path is not defined')
 
