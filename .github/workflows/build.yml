@@ -76,6 +76,7 @@ jobs:
             build \
             --configurationPath=build-system/loligram-ci-configuration.json \
             --codesigningInformationPath=build-system/fake-codesigning \
+            --disableExtensions \
             --configuration=release_arm64 \
             --buildNumber="$BUILD_NUMBER"
 
