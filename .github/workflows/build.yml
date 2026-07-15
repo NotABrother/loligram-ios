@@ -25,6 +25,16 @@ jobs:
       - name: Select Xcode 16.4
         run: sudo xcode-select -s /Applications/Xcode_16.4.app/Contents/Developer
 
+      - name: Restore Bazel disk cache
+        id: bazel-cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/loligram-bazel-disk-cache
+          key: loligram-bazel-xcode16.4-${{ runner.arch }}-${{ github.run_id }}
+          restore-keys: |
+            loligram-bazel-xcode16.4-${{ runner.arch }}-
+
       - name: Validate Telegram API secrets
         env:
           TELEGRAM_API_ID: ${{ secrets.TELEGRAM_API_ID }}
@@ -110,6 +120,7 @@ jobs:
           python3 -u build-system/Make/Make.py \
             --bazelUserRoot="$BAZEL_USER_ROOT" \
             --overrideXcodeVersion \
+            --cacheDir="$RUNNER_TEMP/loligram-bazel-disk-cache" \
             build \
             --configurationPath=build-system/loligram-ci-configuration.json \
             --codesigningInformationPath=build-system/fake-codesigning \
@@ -128,3 +139,11 @@ jobs:
           path: /Users/Shared/telegram-ios/build/artifacts/Loligram.ipa
           if-no-files-found: error
           retention-days: 14
+
+      - name: Save Bazel disk cache
+        if: always()
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/loligram-bazel-disk-cache
+          key: ${{ steps.bazel-cache.outputs.cache-primary-key }}
